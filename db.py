@@ -30,15 +30,16 @@ def get_db_connection():
         pass
 
     # La URL ya incluye sslmode=require
-    return psycopg2.connect(url)
+    from urllib.parse import urlparse
 
-    try:
-        conn = psycopg2.connect(Config.DATABASE_URL)
-        logger.info("Conectado a NeonDB (PostgreSQL).")
-        return conn
-    except Exception as e:
-        logger.error(f"Error conectando a NeonDB: {str(e)}")
-        raise
+    parsed = urlparse(url)
+    user = parsed.username
+    host = parsed.hostname
+    db   = parsed.path.lstrip('/')
+    logger.info(f"DB USER: {user} | HOST: {host} | DB: {db}")
+    print(f"DB USER: {user} | HOST: {host} | DB: {db}")
+
+    return psycopg2.connect(url)
 
 
 def init_transactions_table():
