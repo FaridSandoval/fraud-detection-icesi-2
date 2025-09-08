@@ -1,3 +1,4 @@
+import os
 import psycopg2
 import logging
 from config import Config
@@ -15,6 +16,22 @@ def get_db_connection():
     Raises:
         Exception: Si ocurre algún error al conectar a la base de datos.
     """
+
+    url = os.getenv("DATABASE_URL")
+    assert url, "DATABASE_URL no está definida"
+
+    # Log temporal para verificar que Render inyecta la URL correcta (sin exponer la contraseña)
+    try:
+        masked = url.split("://", 1)[1]            # user:pass@host/db?...
+        masked = masked.split("@", 1)[1]           # host/db?...
+        logger.info(f"USANDO DB: {masked}")
+        print(f"USANDO DB: {masked}")
+    except Exception:
+        pass
+
+    # La URL ya incluye sslmode=require
+    return psycopg2.connect(url)
+
     try:
         conn = psycopg2.connect(Config.DATABASE_URL)
         logger.info("Conectado a NeonDB (PostgreSQL).")
